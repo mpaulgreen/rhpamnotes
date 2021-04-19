@@ -1,0 +1,260 @@
+- OpenShift Container Platform
+    - Container orchestration platform based on Kubernetes
+    - Benefits both operations and development
+    - Provides developers and IT organizations with cloud application platform
+        - Used for deploying applications on secure, scalable resources
+        - Minimal configuration and management overhead
+    - Supports Java™, Python, Ruby, Node.js, Perl, PHP, .NET, and more
+    - OpenShift Container Platform’s Control Plane is only available to be deployed on RHCOS
+    - OpenShift Container Platform workloads may be deployed on RHCOS or Red Hat Enterprise Linux
+        - RHCOS available only for OpenShift deployments, not for general use
+        - RHCOS codifies operational expertise for OpenShift with new purpose-built tooling
+        - RHCOS is FIPS-compliant
+    - Brings Kubernetes platform to customer data centers and cloud
+        - Meets security, privacy, compliance, and governance requirements
+
+- Product and Infrastructure Providers
+    - OpenShift 4 is truely a hybrid cloud solution
+    - Can be deployed fully automatically on public cloud, private cloud or automated infrastructure
+    - OpenShift is capable of automating infrastructure deployment and product deployment. This is also known as installer provisioned infrastructure (IPI).
+    - IPI is supported on AWS, Azure, GCP, Red Hat Open Stack, Red Hat Virtualization
+    - Open Shift can be also installed on user provisioned infrastructure (UPI), that has networking, storage and compute. (AWS, Azure, GCP, Red Hat Virtualization, Red Hat Open Stack, VMWare vSphere, Bare Metal)
+    - OpenShift Kubernetes Engine
+        - Users explore OpenShift 4 kuernetes engine, not entire platform
+        - Core K8s functionality with big ISV ecosystem
+        - Enjoy RHCOS immutable and secure architecture
+        - Appeals to DIY. *KS or lower end
+- Architecture and Concepts
+    - OpenShift runs on RHCOS and RHEL
+    - OpenShift has two types of nodes
+        - Workers
+        - Masters
+    - Nodes are 
+        - Instances of RHEL or RHCOS with OPenShift Installed
+        - Workers: Where end user application runs
+        - Masters - Manage the cluster. It makes up the OpenShift control plane.
+        - The OpenShift node daemons and other software run on all nodes.
+    - Containers
+        - All application instances and components run in OCI-compliant containers
+        - OpenShift worker node can run many containers
+        - Node capacity related to memory and CPU capabilities of underlying resources
+    - POD
+        - One or more containers deployed together on one host
+            -  Consists of colocated group of containers with shared resources such as volumes and IP addresses
+            - Smallest compute unit defined, deployed, managed
+        - May contain one or more tightly coupled, colocated applications, ones that run with shared context
+        - Orchestrated unit in OpenShift
+            - OpenShift schedules and runs all containers in pod on same node
+            - Complex applications made up of many pods, each with own containers
+                - Interact externally and also with one another inside OpenShift environment
+            - OpenShift runs container images in containers wrapped by meta object called "pod"
+            - Possible to have multiple containers in single pod
+                - Example: To support cluster features as sidecar containers
+            - Most applications benefit from flexibility of single-container pod
+                - Different components such as application server and database generally not placed in single pod
+                - Allows for individual application components to be easily scaled horizontally
+            - Application components are wired together by services
+    - Service 
+        - Defines logical set of pods and access policy
+            - Provides permanent internal IP address and host name for other applications to use as pods are created and destroyed
+        - Service layer connects application components together
+            - Example: Front-end web service connects to database instance by communicating with its service
+        - Services allow simple internal load balancing across application components
+            - OpenShift automatically injects service information into running containers for ease of discovery
+    - Labels 
+        - Used to organize, group, or select API objects
+            - Example: Tag pods with labels, services use label selectors to identify pods they proxy to
+            - Makes it possible for services to reference groups of pods
+            - Able to treat pods with potentially different containers as related entities
+        - Most objects able to include labels in metadata
+        - Group arbitrarily related objects with labels
+        - Labels are simple key-value pairs:
+    - Master Nodes
+        - Instances of RHCOS
+        - Primary functions:
+            - Orchestrate activities on worker nodes
+            - Know and maintain state within OpenShift environment
+        - Three masters for high availability
+    - etcd
+        - Desired and current state held in data store that uses etcd as distributed key-value store
+        - etcd also holds:
+            - RBAC rules
+            - Application environment information
+            - Non-application user data
+    - Master Services - Core Kubernetes Components
+        - Kubernetes API server
+        - Scheduler
+        - Cluster Management Services ( Replication , Metering or Monitoring)
+    - Master Services - Core OpenShift Components
+        - OpenShift features core OpenShift components
+        - OpenShift API server
+            - API calls unique to OpenShift
+            - Operator Lifecycle Manager (OLM)
+            - Over-the-air updates of Operators for workloads, middleware, etc.
+            - Web console
+    - Master Infrastructure Services
+        - Masters and workers collaborate
+        - Both OpenShift and Kubernetes services included
+        - Run as pods; orchestrated by master control plane
+        - Services include:
+            - Monitoring
+            - Logging
+            - OS tuning
+            - Software defined networking (SDN)
+            - DNS
+            - Kubelet (OpenShift node process)
+    - Master - API and Authentication
+        - Masters provide single API endpoint that all tooling and systems interact with
+            - Includes OpenShift and Kubernetes
+            - All administration requests go through this API
+        - All API requests SSL-encrypted and authenticated
+        - Authorizations handled via fine-grained role-based access control (RBAC)
+        - Masters able to be tied into external identity management systems, Examples - LDAP, Active Directory, OAUth providers like Github and Google
+    - Access
+        - All users access OpenShift through same standard interfaces
+        - Web UI, CLI, IDEs all go through authenticated, RBAC-controlled API
+        - Users do not need system-level access to OpenShift nodes
+        - CI/CD systems integrate with OpenShift through these interfaces
+        - OpenShift deployed on RHCOS enables use of next-generation systems management and monitoring tools
+        - OpenShift deployed on RHEL enables use of existing systems management and monitoring tools
+    - Health and Scaling
+        - Masters monitor health of pods and automatically scale them
+            - User configures pod probes for liveness and readiness
+            - Pods may be configured to automatically scale based on CPU utilization metrics
+            - Masters automatically restart pods that fail probes or exit due to container crash
+            - Pods that fail too often marked as bad and temporarily not restarted
+            - Service layer sends traffic only to healthy pods
+                - Masters automatically orchestrate this to maintain component availability
+    - Scheduler
+        - Component responsible for determining pod placement
+        - Accounts for current memory, CPU, and other environment utilization when placing pods on worker nodes
+        - For application high availability, spreads pod replicas between worker nodes
+        - Able to use real-world topology for OpenShift deployment (regions, zones, etc.)
+        - Handles complex scenarios for scheduling workloads
+        - Uses configuration in combination with node groups and labels
+            - Example: Use regions and zones to carve up OpenShift environment to look like real-world topology
+        - OpenShift 4 can be configured to schedule more infrastructure, automatically
+    - Integrated Container Registry
+        - OpenShift Container Platform includes integrated container registry to store and manage container images
+        - When new image pushed to registry, registry notifies OpenShift and passes along image information including:
+            - Namespace
+            - Name
+            - Image metadata
+        - Various OpenShift components react to new image by creating new builds and deployments
+    - Application Data 
+        - Containers natively ephemeral
+            - Data not saved when containers restarted or created
+        - OpenShift provides persistent storage subsystem that automatically connects real-world storage to correct pods
+            - Allows use of stateful applications
+        - OpenShift Container Platform provides wide array of persistent storage types including:
+            - Raw devices: iSCSI, Fibre Channel
+            - Enterprise storage: NFS
+            - Cloud-type options: Ceph®, AWS EBS, pDisk
+    - Routing Layer
+        - Provides external clients access to applications running inside OpenShift
+        - Close partner to service layer
+        - Runs in pods inside OpenShift
+        - Provides
+            - Automated load balancing to pods for external clients
+            - Load balancing and auto-routing around unhealthy pods
+        - Routing layer pluggable and extensible
+            - Options include non-OpenShift software routers
+    - ReplicaSet and Replication Controller
+        - Two implementations:
+            - ReplicaSet = Kubernetes
+            - Replication controller = OpenShift
+        - Ensures specified number of pod replicas running at all times
+        - If pods exit or are deleted, replication controller instantiates more
+        - If more pods running than needed, ReplicaSet deletes as many as necessary
+    - Deployment and DeploymentConfig ( Cannot track auto scaled PODS)
+        - Define how to roll out new versions of pods
+        - Identify:
+            - Image name
+            - Number of replicas
+            - Label target deployment nodes
+        - Update pods based on:
+            - Version
+            - Strategy
+            - Change Triggers
+    - Kubernetes Operator is a Kubernetes native application
+        - Puts all operational knowledge into Kubernetes primitives
+        - Administrators, shell scripts, automation software (e.g. Ansible®) now in Kubernetes pods
+        - Integrates natively with Kubernetes concepts and APIs
+    - Operators: Design
+        - Are pods with operator code that interact with Kubernetes API server
+        - Run "reconciliation loops" to check on application service
+        - Make sure user-specified state of objects is achieved
+        - Manage all deployed resources and your application
+        - Act as application-specific controllers
+        - Extend Kubernetes API with Custom Resource Definition (CRD)
+    - Operator Framework
+        - Operator SDK
+            - Developers build, package, test operator
+            - No knowledge of Kubernetes API complexities required
+        - Operator Lifecycle Manager (OLM)
+            - Helps install, update, manage life cycle of all operators in cluster
+        - Operator Metering
+            - Usage reporting for Operators and resources within Kubernetes
+    - OperatorHub.io
+        - Kubernetes Internet community for sharing Operators
+        - Works for any Kubernetes environment
+        - Packages Operators for easy deployment and management
+        - Publicizes Operators and enables adoption
+        - Uses OLM to install, manage, update Operators
+    - Networking Workflow
+        - Container networking based on integrated Open vSwitch
+        - Platform-wide routing tier
+        - Ability to plug in third-party SDN solutions
+        - Integrated with DNS and existing routing and load balancing
+        - Route
+            - Exposes service by giving it externally reachable host name
+            - Consists of route name, service selector, and (optional) security configuration
+            - Router can consume defined route and endpoints identified by service
+            - Provides named connectivity
+            - Lets external clients reach OpenShift-hosted applications
+        - Router
+            - Multi-tier applications easily deployed
+                - Routing layer required to reach applications from outside OpenShift environment
+            - Router container can run on any node host in environment
+                - Administrator creates wildcard DNS entry (CNAME or A record) on DNS server
+                - DNS entry resolves to node host hosting router container
+            - Router is ingress point for traffic destined for OpenShift-hosted pods
+                - Router container resolves external requests
+                    (https://myapp.cloudapps.openshift.opentlc.com)
+                    - Proxies requests to correct pods
+            - Scenario
+                - External client points browser to myApp.apps.openshift.opentlc.com:80
+                - DNS resolves to host running router container
+                - Using openshift-sdn overlay network:
+                    - Router checks if route exists for request
+                    - Proxies request to internal pod IP:port (10.1.2.3:8080)
+            - POD Connectivity
+                - Pods use network of OpenShift node host to connect to other pods and external networks
+                - Scenario
+                    - Pod transmits packet to pod in another node host in OpenShift environment
+                        - Container sends packet to target pod using IP 10.1.2.3:8080
+                        - OpenShift node uses Open vSwitch to route packet to OpenShift node hosting target container
+                        - Receiving node routes packet to target container
+            - Services and PODS
+                - Services often used to provide permanent IP address to group of similar pods
+                - Internally, when accessed, services load balance to appropriate backing pod
+                - Backing pods can be added to or removed from service arbitrarily while service remains consistently available
+                    - Enables anything that depends on service to refer to it at consistent internal address
+                - Services have DNS names internal to OpenShift
+                    - Example - my-service.my-project.svc.cluster.local
+                    - PODS have access to internal DNS
+                    - Scenario
+                        - Pod transmits packet to service representing one or more pods
+                            - Container sends packet to target service using IP 172.30.0.99:9999
+                            - When service requested, OpenShift node proxies packet to pod represented by service (10.1.2.3:8080)
+    - Container Deployment Workflow
+        - New application requested via CLI, web console, or API
+            - OpenShift API/authentication:
+                - Approves request, considering user’s permissions, resource quotas, and other information
+                - Creates supporting resources as needed: deployment configuration, replication controllers, services, routes, persistent storage claims
+            - OpenShift scheduler:
+                - Designates worker node for each pod, considering resources' availability and load, and application spread between nodes for application high availability
+            - OpenShift worker node:
+                - Pulls down image to be used from external or integrated registry
+                - Starts container (pod) on worker node
+                
