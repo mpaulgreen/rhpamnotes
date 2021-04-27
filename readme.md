@@ -19,6 +19,12 @@
     - OpenShift is capable of automating infrastructure deployment and product deployment. This is also known as installer provisioned infrastructure (IPI).
     - IPI is supported on AWS, Azure, GCP, Red Hat Open Stack, Red Hat Virtualization
     - Open Shift can be also installed on user provisioned infrastructure (UPI), that has networking, storage and compute. (AWS, Azure, GCP, Red Hat Virtualization, Red Hat Open Stack, VMWare vSphere, Bare Metal)
+    - OpenShift 3.11
+        - Supported anywhere RHEL runs
+                - Bare-metal physical machines, virtualized infrastructure, in private or certified public clouds
+                - Virtualization platforms: Red Hat Virtualization, vSphere, Hyper-V
+                - Red Hat OpenStack Platform, certified public cloud providers like Amazon, Google, Azure
+                - x86 and IBM Power server architectures
     - OpenShift Kubernetes Engine
         - Users explore OpenShift 4 kuernetes engine, not entire platform
         - Core K8s functionality with big ISV ecosystem
@@ -257,4 +263,381 @@
             - OpenShift worker node:
                 - Pulls down image to be used from external or integrated registry
                 - Starts container (pod) on worker node
-                
+- User Experience
+    - Web Console
+        - To perform administrative, management and trouble shooting tasks
+        - It supports both adminsitrator and developer perspectives
+        - Runs as pods on master node on openshift console project
+        - It is managed by an operator POD
+        - ISVs can customize the behavior of the Web console and direct customizations
+        - Web console now features built in metrics reducing dependencies on external tool such as grafana
+    - Developer perspective
+        - Topology view
+            - Application-centric
+            - Shows components and status, routes, source code
+            - Drag arrows to create relationships
+            - Add components to applications easily
+            - Project
+                - Application Status, Resource Utilization, Project Event Stream, and Quota consumptions
+                - Project Access
+                    - Control users and groups
+                - Troubleshoot the problems for an application using prometheus query language, or prompt UL
+    - Administrator perspective
+        - For project and cluster administrator
+        - Cluster inventory - Status, Activity/Events, Capacity and Utilization
+        - Every common resource type manageable
+        - Logging and metrics
+        - Advanced settings to view: Updates, Operators, CRDs, role bindings, resource quotas
+    - Project
+        - Allows groups of users or developers to work together
+        - Unit of isolation and collaboration
+        - Defines scope of resources
+        - Allows project administrators and collaborators to manage resources
+        - Restricts and tracks use of resources with quotas and limits
+        - Kubernetes namespace with additional annotations
+            - Central vehicle for managing resource access for regular users
+            - Lets community of users organize and manage content in isolation from other communities
+        - Users:
+            - Receive access to projects from administrators
+            - Have access to own projects if allowed to create them
+        - Each project has own:
+            - Objects: Pods, services, replication controllers, etc.
+            - Policies: Rules that specify which users can or cannot perform actions on objects
+            - Constraints: Quotas for objects that can be limited
+            - Service accounts: Users that act automatically with access to project objects
+        - Users and Projects
+            - Interactions with OpenShift® always associated with user
+                - System permissions granted by adding roles to users or groups
+            - User types:
+                - Regular Users
+                    - How most interactive OpenShift users are represented
+                    - Created automatically in system upon first login, or via API
+                    - Represented with user object
+                - System Users
+                    - Many created automatically when infrastructure defined
+                    - Let infrastructure interact with API securely
+                    - Include: cluster administrator, per-node user, service accounts
+            - Login and Authentication
+                - Every user must authenticate to access OpenShift
+                - API requests lacking valid authentication are authenticated as anonymous user
+                - Policy determines what user is authorized to do
+            - Web Console Authentication
+                - Access web console at URL provided by your administrator
+                - Provide login credentials to obtain token to make API calls
+                - Use web console to navigate projects
+            - Quotas and Limits
+                - Resource Quotas
+                    - OpenShift can limit:
+                        - Number of objects created in project
+                        - Amount of compute/memory/storage resources requested across objects in project
+                        - Based on specified label
+                            - Examples: To limit to department of developers or environment such as test
+                    - Multiple teams can share single OpenShift cluster
+                        - Each team in own project or projects
+                        - Resource quotas prevent teams from depriving each other of cluster resources
+                    - ResourceQuota object enumerates hard resource usage limits per project
+                    - ClusterResourceQuota object enumerates hard resource usage limits for users across the cluster
+                    - LimitRanges
+                        - LimitRanges express CPU and memory requirements of pods' containers
+                            - Set request and limit of CPU and memory particular pods' container may consume
+                            - Aid OpenShift scheduler in assigning pods to nodes
+                        - LimitRanges express quality of service tiers:
+                            - Best Effort
+                            - Burstable
+                            - Guaranteed
+                    - Default LimitRange for all pods/containers can be set for each project
+                    - Compute Resources Managed by Quota Across Pods in Non-Terminal State
+                        - cpu, requests.cpu - sum of CPU requests cannot exceed this value
+                        - memory, requests.memory - Sum of memory requests cannot exceed this value
+                        - limits.cpu - Sum of CPU limits cannnot exceed this value
+                        - limits.memory - Sum of memory limits cannot exceed this value
+                    - Object Counts Managed by Quota
+                        - pods - Total number of pods in non-terminal state that can exist in project (pod is in terminal state if status.phase in (Failed, Succeeded) is true)
+                        - replicationcontrollers - Total number of replication controllers that can exist in project
+                        - resourcequotas - Total number of resource quotas that can exist in project
+                        - services - Total number of services that can exist in project
+                        - secrets - Total number of secrets that can exist in project
+                        - configmaps - Total number of ConfigMap objects that can exist in project
+                        - persistentvolumeclaims - Total number of persistent volume claims that can exist in project
+                        - openshift.io/imagestreams - Total number of image streams that can exist in project
+                    - Quota Enforcement
+                        - After quota created in project:
+                            - Project restricts ability to create resources that may violate quota constraint
+                            - Usage statistics calculated every few seconds (configurable)
+                        - If project modification exceeds quota:
+                            - Server denies action
+                            - Returns error message
+                        - Error message includes:
+                            - Quota constraint violated
+                            - Current system usage statistics
+                    - Cluster Monitoring Operator (CMO)
+                        - Watches deployed monitoring components, resources; keeps up to date
+                    - Prometheus Operator (PO)
+                        - Manages Prometheus and Alertmanager
+                        - Automatically generates monitoring targets based on Kubernetes label queries
+                        - Alertmanager processes client alerts and routes to email, PagerDuty, etc.
+                    - node-exporter: Agent to collect metrics
+                    - kube-state-metrics: Converts objects to metrics
+                    - Metrics Collection and Alerting with Prometheus - HPA
+                        - Configure horizontal pod autoscaling (HPA) based on any metric from Prometheus
+                            - Autoscale based on any cluster-level metrics from OpenShift
+                            - Autoscale based on any application metrics
+                        - Autoscales pods and machines
+                            - Prometheus Adapter connects to single Prometheus instance (or via Kubernetes service)
+                            - Manual deployment and configuration of adapter
+                            - Cluster administrator needs to whitelist cluster metrics for HPA
+        - Templates:
+            - Can only create resources
+            - Cannot manage or delete resources
+            - Not associated with pod
+        - Operators:
+            - Create, manage, and delete resources
+            - Implemented by operator pods
+        - Helm 3:
+            - Package of templates
+            - How application packaged
+            - How package installed
+        - What Is a Template?
+            - Describes set of objects that can be parameterized and processed to produce list of objects for OpenShift to create
+            - Process templates to create anything you have permission to create within project
+            - Can also define set of labels to apply to every object defined in template
+        - What Are Templates For?
+            - Create instantly deployable applications for developers or customers
+            - Provide option to use preset variables or randomize values (like passwords)
+        - Labels in Templates
+            - Used to manage generated resources
+            - Apply to every resource generated from template
+            - Organize, group, or select objects and resources
+            - Resources and pods are "tagged" with labels
+            - Labels allow services and replication controllers to:
+                - Determine pods they relate to
+                - Reference groups of pods
+                - Treat pods with different containers as similar entities
+            - Parameters in Templates
+                - Share configuration values between different objects in template
+                - Values can be static or generated by template
+                - Templates let you define parameters that take on values
+                    - Value substituted wherever parameter is referenced
+                    - Can define references in any text field in object definition
+            - Creating Templates from Existing Objects
+                - Can export existing objects from project in template form
+                - Modify exported template by adding parameters and customizations
+            - Operator Hub
+                - Deploy and manage application in cluster with Operator
+                - Discover Operators from Kubernetes community and Red Hat® partners
+                - Install Operators on clusters to provide optional add-ons and shared services to developers
+                - Capabilities provided by Operator appear in Developer Catalog, providing self-service experience
+                - Add shared applications, services, or source-to-image builders to your project
+                - Cluster administrators can install additional applications that show up automatically
+            - Operator Interaction with OpenShift
+                - Operators are pods that take advantage of custom resource definitions (CRDs)
+                - CRDs allow extension of Kubernetes/OpenShift API
+                    - API then knows new resources
+                - CRDs allow creation of custom resources (CRs)
+                - Operator watches for creation of CR, reacts by creating application
+                - CRs managed in same way as stock OpenShift objects
+                    - create, get, describe, delete, etc.
+            - Operators - Custom Resource (Application) Creation
+                - Custom Resources are simple definitions of resource you want Operator to create
+                - Running Operator watches for CR to be created in either:
+                    - Entire OpenShift cluster
+                    - Project that Operator is running in
+                - When CR created, operator receives event
+                - Operator then creates all OpenShift resources that make up application
+            - Operators - Custom Resource Management
+                - To manipulate and examine CR, use oc commands
+                - Do not scale ReplicaSets, Deployment, StatefulSets directly
+                    - Use Operator to scale
+                    - Operator continues to watch created resources and sets them back to initial states
+                - To delete all created OpenShift API objects, delete CR
+- Application Deployment
+    - Current Technology - Evolving Technology
+    - PaaS - Unopinionated container platforms
+    - Complicated cluster deployments - Cluster managed self deployments
+    - Business value interruptions for platform updates - Over the air updates
+    - Custom configuration automation - Immutable infrastructure
+    - IaaS - Cluster driven infrastructure
+    - Simple application deployments - OpenShift service meshh drivben complex technologies
+    - Microservices - OpenShift Serverless computing
+    - Containers from internet - Validated, supported, runtime and middleware containers
+    - Bespoke infrastructure deployment consulting - DevOps consulting and Red Hat Open Innovation labs
+- Silos create inefficiency
+    - Developers Care About:
+        - Building applications
+        - Automating tests
+        - Continuous integration
+        - Performance tuning
+        - Debugging
+    - Operations Cares About:
+        - Deploying applications
+        - Managing applications, infrastructure
+        - Reliability
+        - Security
+        - Compliance
+    - OpenShift deployments provide fine-grained management over applications
+        - Based on user-defined template called "deployment configuration"
+    - Features Provided by Deployment System
+        - Deployment configuration: Template for running applications
+            - Contains version number
+                - Incremented each time new replication controller (Kubernetes ReplicaSet) created from configuration
+            - Contains cause of last deployed replication controller
+        - Triggers that drive automated deployments in response to events
+        - Strategies to transition from previous version to new version
+        - Rollbacks to previous version in case of deployment failure
+            - Either manual or automatic
+        - Manual replication scaling and autoscaling
+    - Rollbacks
+        - Deployments allow rollbacks
+            - Rollbacks revert application back to previous revision
+            - Performed via REST API, CLI, or web console
+        - Deployment configurations support automatic rollback to last successful revision of configuration
+            - Triggered if latest template fails to deploy
+    - Deployment Strategies
+        - Defined by deployment configuration
+        - Determines deployment process
+            - During deployments, each application has different requirements
+                - Availability
+                - Other considerations
+            - OpenShift provides strategies to support variety of deployment scenarios
+            - Readiness checks determine if new pod ready for use
+                - If readiness check fails, deployment configuration retries until it times out
+    - Rolling Deployment Strategy
+        - Performs rolling update
+        - Supports life-cycle hooks for injecting code into deployment process
+        - Waits for pods to pass readiness check before scaling down old components
+            - Does not allow pods that do not pass readiness check within timeout
+        - Used by default if no strategy specified in deployment configuration
+    - Rolling Deployment Strategy Process
+        - Steps in rolling strategy process:
+            - Execute pre life-cycle hook
+            - Scale up new deployment by one or more pods (based on maxSurge value)
+                - Wait for readiness checks to complete
+            - Scale down old deployment by one or more pods (based on maxUnavailable value)
+            - Repeat scaling until new deployment reaches desired replica count and old deployment scales to zero
+            - Execute any post life-cycle hooks
+        - When scaling down, strategy waits for pods to become ready
+            - Decides whether further scaling would affect availability
+        - If scaled-up pods never become ready, deployment times out
+            - Results in deployment failure
+    - Recreate Strategy
+        - Has basic rollout behavior
+        - Supports life-cycle hooks for injecting code into deployment process
+        - Steps in Recreate strategy deployment:
+            - Execute pre life-cycle hook
+            - Scale down previous deployment to zero
+            - Scale up new deployment
+            - Execute post life-cycle hook
+    - Custom Deployment Strategy
+        - Example
+            ```
+            "strategy": {
+                "type": "Custom",
+                "customParams": {
+                    "image": "organization/strategy",
+                    "command": ["command", "arg1"],
+                    "environment": [
+                    {
+                        "name": "ENV_1",
+                        "value": "VALUE_1"
+                    }
+                    ]
+                }
+                }
+            ```
+    - Builds and S2I
+        - Builds
+            - Process of transforming input parameters into resulting object
+                - Most often used to transform input parameters or source code into runnable image
+                - BuildConfig object: Definition of entire build process
+                - OpenShift leverages Kubernetes
+                    - Creates containers from build images
+                    - Pushes containers to integrated registry
+        - Build Strategies
+            - Build system in OpenShift provides extensible support for build strategies
+                - Selectable strategies specified in build API
+            - Four primary build strategies:
+                - Container build
+                - Source-to-Image (S2I) build
+                - Custom build
+                - Pipeline build (deprecated)
+            - Object resulting from build depends on builder used to create it
+                - Container and S2I: Runnable images
+                - Custom: Whatever builder image author specified
+                - Pipeline: Jenkins pipelines executable by Jenkins Pipeline plug-in (deprecated)
+            - Container Build
+                - Container build strategy invokes plain podman build command
+                - Expects repository with Dockerfile and artifacts required to produce runnable image
+            - Source-to-Image (S2I) Build
+                - S2I: Tool for building reproducible container images
+                - Produces ready-to-run images
+                    - Injects application source into container image, assembles new container image
+                - New image incorporates base image (builder) and built source
+                - Ready to use with podman run command
+            - S2I supports incremental builds
+                - Reuses previously downloaded dependencies, previously built artifacts, etc.
+    - S2I Build Advantages
+        - Image flexibility
+            - S2I scripts can inject application code into most container images, exploiting existing ecosystem. Uses tar to inject application source.
+        - Speed
+            - Assemble process performs large number of complex operations without creating new layer at each step
+            - S2I scripts reuse artifacts stored in previous version of application image
+        - Patchability
+            - Rebuild application consistently if underlying image needs patch due to security issue
+        - Operational efficiency
+            - Restrict build operations and prevent arbitrary actions allowed by Dockerfiles
+            - Avoid accidental or intentional abuses of build system
+    - Custom Build
+        - Custom build strategy: You define specific builder image responsible for entire build process
+            - Using own builder image allows you to customize build process
+        - Custom builder image is plain OCI-compliant container image embedded with build process logic
+            - Examples: Building RPMs or base container images
+    - Image Stream
+        - Comprises OCI-compliant container images identified by tags
+        - Presents single virtual view of related images
+            - Similar to container image repository
+        - May contain images from any of following:
+            - Image repository in integrated OpenShift Container Platform registry
+            - Other image streams
+            - Container image repositories from external registries
+        - New images added to associated image stream
+        - Builds and deployments watch image stream
+            - Receive notifications when new images added
+            - React by performing build or deployment
+    - OpenShift Service Mesh
+        - Enhances deployment options for microservices
+        - CI/CD systems provide minimal configuration information
+    - Istio
+        - Layer for service-to-service communication
+        - Manages discovery, load balancing, failure recovery, metrics, monitoring
+        - Microservices operations support for A/B testing, canary rollouts, rate limiting, access control, end-to-end authentication
+        - Implemented as array of lightweight proxies injected as sidecar containers
+    - OpenShift Serverless Technology
+        - Trigger Deployments on application events
+        - Knative serving
+        - Knative eventing
+        - Camel K + connectors (Evenet Sources)
+        - Kafka + Strimzi
+    - OpenShift Serverless Technology
+        - Serving
+            - From container to URL within seconds
+            - Easier developer experience for Kubernetes
+            - Built-in versioning, traffic split, and more
+            - Simplified installation experience with Kourier
+            - Automatic TLS/SSL for applications
+    - Pipelines
+        - Tekton-based Pipelines in Technology Preview
+            - Serverless CI/CD
+        - Jenkins jobs enabled by Pipeline plug-in
+            - Built with simple text scripts that use Pipeline DSL based on Groovy
+    - Pipeline Characteristics
+        - Durable
+            - Survive planned and unplanned restarts of Jenkins master
+        - Pausable
+            - Optionally stop and wait for human input or approval before completing jobs
+        - Versatile
+            - Support complex real-world CD requirements
+                - Ability to fork or join
+                - Ability to loop
+                - Ability to work in parallel with other pipelines
+        - Extensible
+            - Plug-in supports custom extensions to its DSL, multiple integration options with other plug-ins
